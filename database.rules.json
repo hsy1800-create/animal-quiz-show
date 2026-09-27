@@ -1,0 +1,55 @@
+{
+  "rules": {
+    "rooms": {
+      "$code": {
+        ".read": "auth != null && data.child('host').val() === auth.uid",
+        ".write": "auth != null && ((!data.exists() && newData.child('host').val() === auth.uid) || data.child('host').val() === auth.uid)",
+        "host": { ".read": "auth != null" },
+        "info": { ".read": "auth != null" },
+        "state": { ".read": "auth != null" },
+        "teams": { ".read": "auth != null" },
+        "pscores": { ".read": "auth != null" },
+        "players": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('rooms/' + $code + '/host').exists()",
+            ".validate": "newData.child('name').isString() && newData.child('name').val().length <= 10 && newData.child('team').isString() && root.child('rooms/' + $code + '/teams/' + newData.child('team').val()).exists()"
+          }
+        },
+        "q": {
+          ".read": "auth != null",
+          "$qi": {
+            "ans": {
+              "$uid": {
+                ".write": "auth != null && auth.uid === $uid && root.child('rooms/' + $code + '/state/phase').val() === 'question'"
+              }
+            },
+            "teamAns": {
+              "$t": {
+                ".write": "auth != null && root.child('rooms/' + $code + '/players/' + auth.uid + '/team').val() === $t && root.child('rooms/' + $code + '/state/phase').val() === 'question'"
+              }
+            },
+            "picks": {
+              "$t": {
+                ".write": "auth != null && root.child('rooms/' + $code + '/players/' + auth.uid + '/team').val() === $t && root.child('rooms/' + $code + '/state/phase').val() === 'pick'"
+              }
+            },
+            "req": {
+              "$t": {
+                "freePass": {
+                  ".write": "auth != null && root.child('rooms/' + $code + '/players/' + auth.uid + '/team').val() === $t && root.child('rooms/' + $code + '/state/phase').val() === 'question'"
+                },
+                "double": {
+                  ".write": "auth != null && root.child('rooms/' + $code + '/players/' + auth.uid + '/team').val() === $t && root.child('rooms/' + $code + '/state/phase').val() === 'pick'"
+                },
+                "dice": {
+                  ".write": "auth != null && root.child('rooms/' + $code + '/players/' + auth.uid + '/team').val() === $t && root.child('rooms/' + $code + '/state/phase').val() === 'boxes'"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
